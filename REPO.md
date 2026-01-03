@@ -11,3 +11,27 @@ website: https://github.com/justyns/silverbullet-libraries
 author: justyns
 uri: https://github.com/justyns/silverbullet-libraries/blob/master/Get%20GPS%20Coords.md
 ```
+
+```#meta/library/remote
+name: SearXNG Web Search Integration
+description: Search the web using a SearXNG instance. Requires API support to be enabled.
+website: https://github.com/justyns/silverbullet-libraries
+author: justyns
+uri: https://github.com/justyns/silverbullet-libraries/blob/master/AI Tool - SearXNG search.md
+```
+
+```#meta/library/remote
+name: Silversearch Integration
+description: Integration with the Silversearch plug. Allows querying of your space and retrieves results.
+website: https://github.com/justyns/silverbullet-libraries
+author: justyns
+uri: https://github.com/justyns/silverbullet-libraries/blob/master/AI Tool - Silversearch.md
+```
+
+```#meta/library/remote
+name: Web Fetch Tool
+description: Fetch a URL and convert its HTML content to markdown.
+website: https://github.com/justyns/silverbullet-libraries
+author: justyns
+uri: https://github.com/justyns/silverbullet-libraries/blob/master/AI Tool - Web Fetch.md
+```
