@@ -31,4 +31,10 @@ description: Fetch a URL and convert its HTML content to markdown.
 website: https://github.com/justyns/silverbullet-libraries
 author: justyns
 uri: https://github.com/justyns/silverbullet-libraries/blob/master/AI Tool - Web Fetch.md
+---
+name: Forgejo
+description: Read/write support for Forgejo and Gitea git servers.
+website: https://github.com/justyns/silverbullet-libraries
+author: justyns
+uri: https://github.com/justyns/silverbullet-libraries/blob/master/Forgejo.md
 ```
