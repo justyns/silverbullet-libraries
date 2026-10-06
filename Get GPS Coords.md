@@ -1,6 +1,7 @@
 ---
 name: Library/justyns/Get GPS Coords
 tags: meta/library
+author: justyns
 ---
 
 I'm using this in [[Library/Core/Quick Notes]] for the template when a new note is created. It works on desktop and mobile.
