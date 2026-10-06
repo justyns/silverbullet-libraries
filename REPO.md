@@ -37,4 +37,22 @@ description: Read/write support for Forgejo and Gitea git servers.
 website: https://github.com/justyns/silverbullet-libraries
 author: justyns
 uri: https://github.com/justyns/silverbullet-libraries/blob/master/Forgejo.md
+---
+name: Markdown Utilities
+description: Space Lua helpers for finding headings and list items and inserting text under a heading, built on markdown.parseMarkdown.
+website: https://github.com/justyns/silverbullet-libraries
+author: justyns
+uri: https://github.com/justyns/silverbullet-libraries/blob/master/Markdown Utilities.md
+---
+name: Catppuccin Theme
+description: Catppuccin theme with all four flavors, picked separately for light and dark mode in the Configuration Manager.
+website: https://github.com/justyns/silverbullet-libraries
+author: justyns
+uri: https://github.com/justyns/silverbullet-libraries/blob/master/Catppuccin Theme.md
+---
+name: Open Scratch
+description: Commands to open a scratch page, or show it in the right panel next to the current page.
+website: https://github.com/justyns/silverbullet-libraries
+author: justyns
+uri: https://github.com/justyns/silverbullet-libraries/blob/master/Open Scratch.md
 ```
