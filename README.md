@@ -11,10 +11,18 @@ To add this repository to your SilverBullet instance, use the `Library: Add Repo
 
 ## Available Libraries
 
+### Terminal and Claude Code
+
+- [Terminal](https://github.com/justyns/silverbullet-libraries/blob/master/Terminal/Terminal.md): Terminal sessions such as your shell or Claude Code in a modal or panel, served by a small Python bridge through SilverBullet's proxy.
+- [Claude Code](https://github.com/justyns/silverbullet-libraries/blob/master/Claude%20Code/Claude%20Code.md): Connects Claude Code to SilverBullet as its IDE, sharing the current page and selection and showing proposed edits as diffs to accept or reject. Requires Terminal.
+
 ### Misc
 
+- [Catppuccin Theme](https://github.com/justyns/silverbullet-libraries/blob/master/Catppuccin%20Theme.md): Catppuccin theme with all four flavors, picked separately for light and dark mode in the Configuration Manager.
 - [Forgejo](https://github.com/justyns/silverbullet-libraries/blob/master/Forgejo.md): Read/write support for Forgejo and Gitea git servers.
 - [Get GPS Coords](https://github.com/justyns/silverbullet-libraries/blob/master/Get%20GPS%20Coords.md): Lua function to get the current GPS coordinates of the client browser.
+- [Markdown Utilities](https://github.com/justyns/silverbullet-libraries/blob/master/Markdown%20Utilities.md): Space Lua helpers for finding headings and list items and inserting text under a heading, built on markdown.parseMarkdown.
+- [Open Scratch](https://github.com/justyns/silverbullet-libraries/blob/master/Open%20Scratch.md): Commands to open a scratch page, or show it in the right panel next to the current page.
 
 ### silverbullet-ai tools
 
