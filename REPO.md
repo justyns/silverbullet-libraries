@@ -55,4 +55,16 @@ description: Commands to open a scratch page, or show it in the right panel next
 website: https://github.com/justyns/silverbullet-libraries
 author: justyns
 uri: https://github.com/justyns/silverbullet-libraries/blob/master/Open Scratch.md
+---
+name: Terminal
+description: Terminal sessions such as your shell or Claude Code in a modal or panel, served by a small Python bridge through SilverBullet's proxy.
+website: https://github.com/justyns/silverbullet-libraries
+author: justyns
+uri: https://github.com/justyns/silverbullet-libraries/blob/master/Terminal/Terminal.md
+---
+name: Claude Code
+description: Connects Claude Code to SilverBullet as its IDE, sharing the current page and selection and showing proposed edits as diffs to accept or reject. Requires Terminal.
+website: https://github.com/justyns/silverbullet-libraries
+author: justyns
+uri: https://github.com/justyns/silverbullet-libraries/blob/master/Claude Code/Claude Code.md
 ```
