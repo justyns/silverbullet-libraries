@@ -26,13 +26,13 @@ config.set("terminal.sessions", {
 })
 ```
 
-For Claude Code integration, see [[Library/justyns/Claude Code/Claude Code]].
+For Claude Code and Codex integration, see [[Library/justyns/Agent IDE/Agent IDE]].
 
 Set `terminal.bridge` if the bridge is not on `localhost:7681`.
 
 ## Usage
 
-Run the command set in `terminal.sessions` like `Terminal: Toggle`.  It'll start a pty->sse bridge automatically with the `run` command and open a modal or docked view that has [xterm.js](https://xtermjs.org/) embedded and connecting to t hat bridge.
+Run the command set in `terminal.sessions` like `Terminal: Toggle`.  It'll start a pty->sse bridge automatically with the `run` command and open a modal or docked view that has [xterm.js](https://xtermjs.org/) embedded and connecting to that bridge.
 
 ## Requirements / Caveats
 
@@ -91,7 +91,11 @@ config.define("terminal", {
       description = "Bridge sessions to add commands for",
       items = {
         type = "object",
-        properties = {name = schema.string(), title = schema.string(), command = schema.string(), run = schema.string()},
+        properties = {
+          name = schema.string(), title = schema.string(), command = schema.string(), run = schema.string(),
+          startupInput = {type = "string", description = "Text to send followed by Enter once per new process"},
+          startupDelay = {type = "number", minimum = 0, description = "Milliseconds to wait before sending startupInput (default: 0)"},
+        },
         required = {"name", "title", "command", "run"},
       },
       default = {{name = "shell", title = "Terminal", command = "Terminal: Toggle", run = "bash"}},
@@ -113,6 +117,10 @@ local function bridgeCommand()
   local parts = {"python3 Library/justyns/Terminal/bridge.py --cwd . --port " .. port}
   for _, session in ipairs(config.get("terminal.sessions")) do
     table.insert(parts, "--session " .. shellQuote(session.name .. "=" .. session.run))
+    if session.startupInput ~= nil then
+      table.insert(parts, "--startup-input " .. shellQuote(session.name .. "=" .. session.startupInput))
+      table.insert(parts, "--startup-delay " .. shellQuote(session.name .. "=" .. tostring(session.startupDelay or 0)))
+    end
   end
   return table.concat(parts, " ")
 end
@@ -128,8 +136,8 @@ local flatpakEnv = 'if [ -n "$FLATPAK_ID" ]; then'
 
 local token
 
--- The bearer token from .bridge-token in the space folder, which the bridge and the Claude Code
--- IDE server also read. bridge.py creates the file if it's missing.
+-- The bearer token from .bridge-token in the space folder, which the bridge and the Agent IDE
+-- server also read. bridge.py creates the file if it's missing.
 function terminalBridgeToken()
   if not token then
     local result = shell.run("python3", {"Library/justyns/Terminal/bridge.py", "--cwd", ".", "--print-token"})
@@ -152,7 +160,7 @@ function terminalStartDetached(label, command, delay)
   end
 end
 
--- A POST to the bridge or the Claude Code IDE server, as pcall's ok and response.
+-- A POST to the bridge or the Agent IDE server, as pcall's ok and response.
 function terminalBridgePost(hostPort, path, body)
   return pcall(net.proxyFetch, "http://" .. hostPort .. path, {
     method = "POST",
