@@ -11,10 +11,10 @@ To add this repository to your SilverBullet instance, use the `Library: Add Repo
 
 ## Available Libraries
 
-### Terminal and Claude Code
+### Terminal and Agent IDE
 
 - [Terminal](https://github.com/justyns/silverbullet-libraries/blob/master/Terminal/Terminal.md): Terminal sessions such as your shell or Claude Code in a modal or panel, served by a small Python bridge through SilverBullet's proxy.
-- [Claude Code](https://github.com/justyns/silverbullet-libraries/blob/master/Claude%20Code/Claude%20Code.md): Connects Claude Code to SilverBullet as its IDE, sharing the current page and selection and showing proposed edits as diffs to accept or reject. Requires Terminal.
+- [Agent IDE](https://github.com/justyns/silverbullet-libraries/blob/master/Agent%20IDE/Agent%20IDE.md): Connects Claude Code and Codex to SilverBullet as their IDE, sharing the current page and selection. Claude Code can also show proposed edits as diffs to accept or reject. Requires Terminal.
 
 ### Misc
 
