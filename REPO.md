@@ -62,9 +62,9 @@ website: https://github.com/justyns/silverbullet-libraries
 author: justyns
 uri: https://github.com/justyns/silverbullet-libraries/blob/master/Terminal/Terminal.md
 ---
-name: Claude Code
-description: Connects Claude Code to SilverBullet as its IDE, sharing the current page and selection and showing proposed edits as diffs to accept or reject. Requires Terminal.
+name: Agent IDE
+description: Connects Claude Code and Codex to SilverBullet as their IDE, sharing the current page and selection. Claude Code can also show proposed edits as diffs to accept or reject. Requires Terminal.
 website: https://github.com/justyns/silverbullet-libraries
 author: justyns
-uri: https://github.com/justyns/silverbullet-libraries/blob/master/Claude Code/Claude Code.md
+uri: https://github.com/justyns/silverbullet-libraries/blob/master/Agent IDE/Agent IDE.md
 ```
