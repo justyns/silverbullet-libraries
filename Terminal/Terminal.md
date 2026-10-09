@@ -17,7 +17,7 @@ Adds a terminal in a [View](https://docs.silverbullet.md/View) that you can togg
 
 Set `terminal.sessions` to configure what you want to launch.  e.g. just "bash" or "zsh" if you want a regular terminal.  If available, screen or tmux would  be a good idea too.
 
-Only one of each can be open at a time, but you can define multiple.
+Each session gets a tab in one terminal view, and its command opens that tab.
 
 ```lua
 config.set("terminal.sessions", {
@@ -52,9 +52,47 @@ Run the command set in `terminal.sessions` like `Terminal: Toggle`.  It'll start
 ## Code
 
 ```space-style
-.sb-nav-content:has(> .sb-terminal-frame) {
+.sb-nav-content:has(> .sb-terminal-tabs) {
   height: 100%;
   padding: 0;
+}
+
+.sb-terminal-tabs {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--root-background-color);
+}
+
+.sb-terminal-tabbar {
+  display: flex;
+  gap: 2px;
+  padding: 0 8px;
+  border-bottom: 1px solid var(--ui-surface-border-color);
+}
+
+.sb-terminal-tabbar:has(> :only-child) {
+  display: none;
+}
+
+.sb-terminal-tab {
+  padding: 4px 10px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--subtle-color);
+  font: inherit;
+  font-size: 0.85em;
+  cursor: pointer;
+}
+
+.sb-terminal-tab:hover {
+  color: var(--root-color);
+}
+
+.sb-terminal-tab.active {
+  color: var(--root-color);
+  border-bottom-color: var(--ui-accent-color);
 }
 
 .sb-modal:has(.sb-terminal-frame) {
@@ -72,10 +110,14 @@ Run the command set in `terminal.sessions` like `Terminal: Toggle`.  It'll start
 }
 
 .sb-terminal-frame {
-  display: block;
+  flex: 1;
+  min-height: 0;
   width: 100%;
-  height: 100%;
   border: none;
+}
+
+.sb-terminal-frame:not(.active) {
+  display: none;
 }
 ```
 
@@ -269,6 +311,7 @@ local function terminalPage(session)
               return false;
             });
             term.focus();
+            addEventListener("focus", () => term.focus());
 
             // The stream is fetched through the main window, so it has to be cancelled when the view closes.
             const streamControl = new AbortController();
@@ -336,19 +379,78 @@ local function terminalPage(session)
   ]] .. '</script>'
 end
 
-for _, session in ipairs(config.get("terminal.sessions")) do
-  view.define {
-    name = "terminal." .. session.name,
-    title = session.title,
-    command = session.command,
-    dock = "modal",
-    supportedDocks = {"modal", "bhs", "rhs", "lhs"},
-    content = function()
-      local frame = js.window.document.createElement("iframe")
+-- The terminal view's tabs. A tab's iframe loads, and its session starts, when the tab is first selected.
+js.window.eval([[
+  (() => {
+    const tabs = window.sbTerminalTabs ??= {};
+    tabs.isOpen = () => !!tabs.root?.isConnected;
+    tabs.close = () => tabs.root.closest(".sb-nav-root").querySelector(".sb-nav-close").click();
+    tabs.select = (name) => {
+      tabs.active = name;
+      for (const el of tabs.root.querySelectorAll("[data-session]")) {
+        el.classList.toggle("active", el.dataset.session === name);
+      }
+      const frame = tabs.root.querySelector(`iframe[data-session="${CSS.escape(name)}"]`);
+      frame.srcdoc ||= frame.dataset.srcdoc;
+      frame.contentWindow?.focus();
+    };
+    tabs.mount = (root) => {
+      tabs.root = root;
+      root.firstChild.addEventListener("click", (e) => {
+        const tab = e.target.closest("[data-session]");
+        if (tab) tabs.select(tab.dataset.session);
+      });
+      const names = [...root.firstChild.children].map((tab) => tab.dataset.session);
+      tabs.select(names.includes(tabs.active) ? tabs.active : names[0]);
+    };
+  })();
+]])
+
+local sessions = config.get("terminal.sessions")
+
+view.define {
+  name = "terminal",
+  title = "Terminal",
+  dock = "modal",
+  supportedDocks = {"modal", "bhs", "rhs", "lhs"},
+  content = function()
+    local doc = js.window.document
+    local root = doc.createElement("div")
+    root.className = "sb-terminal-tabs"
+    local bar = doc.createElement("div")
+    bar.className = "sb-terminal-tabbar"
+    root.appendChild(bar)
+    for _, session in ipairs(sessions) do
+      local tab = doc.createElement("button")
+      tab.className = "sb-terminal-tab"
+      tab.textContent = session.title
+      tab.setAttribute("data-session", session.name)
+      bar.appendChild(tab)
+      local frame = doc.createElement("iframe")
       frame.className = "sb-terminal-frame"
       frame.allow = "clipboard-read; clipboard-write"
-      frame.srcdoc = terminalPage(session.name)
-      return frame
+      frame.setAttribute("data-session", session.name)
+      frame.setAttribute("data-srcdoc", terminalPage(session.name))
+      root.appendChild(frame)
+    end
+    js.window.sbTerminalTabs.mount(root)
+    return root
+  end,
+}
+
+for _, session in ipairs(sessions) do
+  command.define {
+    name = session.command,
+    run = function()
+      local tabs = js.window.sbTerminalTabs
+      if not tabs.isOpen() then
+        tabs.active = session.name
+        view.open("terminal")
+      elseif tabs.active == session.name then
+        tabs.close()
+      else
+        tabs.select(session.name)
+      end
     end,
   }
 end
