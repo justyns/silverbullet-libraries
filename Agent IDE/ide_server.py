@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Act as an IDE for Claude Code, backed by SilverBullet's editor.
+"""Act as an IDE for Claude Code and Codex, backed by SilverBullet's editor.
 
 Writes ~/.claude/ide/PORT.lock and accepts Claude Code's WebSocket connection
 (MCP over JSON-RPC). SilverBullet reports the current page and selection, and
@@ -13,6 +13,9 @@ receives files Claude Code asks to open:
 
 Claude Code finds the server when started with CLAUDE_CODE_SSE_PORT=PORT and
 ENABLE_IDE_INTEGRATION=true, or through /ide.
+
+Codex's /ide reads the current page and selection from $CODEX_HOME/ipc/ipc.sock
+(default ~/.codex), which the server binds unless another IDE already has it.
 
 Listens on 127.0.0.1 only. Meant to sit behind SilverBullet's /.proxy, which
 supplies authentication. HTTP requests also need the bridge's bearer token from
@@ -29,6 +32,7 @@ import os
 import queue
 import secrets
 import signal
+import socket
 import struct
 import sys
 import threading
@@ -40,6 +44,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."
 from bridge import BridgeHandler, load_token
 
 WEBSOCKET_GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
+CODEX_SOCKET = os.path.join(os.environ.get("CODEX_HOME", os.path.expanduser("~/.codex")), "ipc", "ipc.sock")
 
 
 def schema(*required, **properties):
@@ -217,6 +222,51 @@ class Ide:
         if name == "closeAllDiffTabs":
             return f"CLOSED_{self.close_diffs()}_DIFF_TABS"
 
+    def serve_codex(self):
+        """Answer Codex's /ide requests on its IPC socket, unless another IDE already listens there."""
+        os.makedirs(os.path.dirname(CODEX_SOCKET), mode=0o700, exist_ok=True)
+        if os.path.exists(CODEX_SOCKET):
+            with socket.socket(socket.AF_UNIX) as probe:
+                try:
+                    probe.connect(CODEX_SOCKET)
+                    print(f"{CODEX_SOCKET} belongs to another IDE, so Codex /ide is off", file=sys.stderr)
+                    return
+                except ConnectionRefusedError:
+                    os.remove(CODEX_SOCKET)
+        server = socket.socket(socket.AF_UNIX)
+        server.bind(CODEX_SOCKET)
+        atexit.register(lambda: os.path.exists(CODEX_SOCKET) and os.remove(CODEX_SOCKET))
+        server.listen()
+        while True:
+            conn, _ = server.accept()
+            threading.Thread(target=self.serve_codex_client, args=(conn,), daemon=True).start()
+
+    def serve_codex_client(self, conn):
+        """Each frame is a 4-byte little-endian length, then JSON."""
+        with conn, conn.makefile("rb") as f:
+            while len(header := f.read(4)) == 4:
+                message = json.loads(f.read(int.from_bytes(header, "little")))
+                if message.get("type") != "request":
+                    continue
+                if message.get("method") == "ide-context":
+                    answer = self.codex_context(message["params"]["workspaceRoot"])
+                else:
+                    answer = {"resultType": "error", "error": "no-handler-for-request"}
+                body = json.dumps({"type": "response", "requestId": message["requestId"], **answer}).encode()
+                conn.sendall(len(body).to_bytes(4, "little") + body)
+
+    def codex_context(self, root):
+        if os.path.commonpath([root, self.cwd]) not in (root, self.cwd):
+            return {"resultType": "error", "error": "no-client-found"}
+        selection = self.selection
+        active, tabs = None, []
+        if selection:
+            path = selection["filePath"]
+            tab = {"label": os.path.basename(path), "path": os.path.relpath(path, root), "fsPath": path}
+            active = {**tab, "selection": selection["selection"], "activeSelectionContent": selection["text"], "selections": []}
+            tabs = [tab]
+        return {"resultType": "success", "method": "ide-context", "result": {"ideContext": {"activeFile": active, "openTabs": tabs}}}
+
     def handle(self, message):
         """The JSON-RPC response to message, or None for a notification."""
         method, params = message.get("method"), message.get("params") or {}
@@ -357,6 +407,7 @@ def main():
     Handler.token = load_token(cwd)
     Handler.ide = Ide(cwd, args.port, Handler.token)
     threading.Thread(target=Handler.ide.keep_lockfile, daemon=True).start()
+    threading.Thread(target=Handler.ide.serve_codex, daemon=True).start()
     signal.signal(signal.SIGTERM, lambda *_: sys.exit(0))
     ThreadingHTTPServer(("127.0.0.1", args.port), Handler).serve_forever()
 

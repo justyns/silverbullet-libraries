@@ -48,14 +48,15 @@ def load_token(cwd):
         os.replace(tmp, path)
         with open(path) as f:
             token = f.read().strip()
-    if not token:
-        raise SystemExit(f"{path} is empty")
     return token
 
 
 class Session:
-    def __init__(self, command, cwd):
+    def __init__(self, command, cwd, startup_input=None, startup_delay=0):
         self.argv, self.cwd = ["/bin/sh", "-c", command], cwd
+        self.startup_input = startup_input
+        self.startup_delay = startup_delay
+        self.generation = 0
         self.lock = threading.Lock()
         self.listeners = set()
         self.scrollback = bytearray()
@@ -71,8 +72,32 @@ class Session:
                 os.environ.update(TERM="xterm-256color", COLORTERM="truecolor")
                 os.execvp(self.argv[0], self.argv)
             self.pid, self.fd = pid, fd
+            self.generation += 1
             self.scrollback.clear()
             threading.Thread(target=self._read, daemon=True).start()
+            if self.startup_input is not None:
+                timer = threading.Timer(self.startup_delay / 1000, self._startup, args=(self.generation,))
+                timer.daemon = True
+                timer.start()
+
+    def _startup(self, generation):
+        """Send startup input once, only to the process that scheduled it."""
+        if self._startup_write(generation, self.startup_input.encode()):
+            # TUIs such as Codex treat text plus Enter in one burst as a paste,
+            # inserting a newline instead of submitting. Let paste detection settle.
+            timer = threading.Timer(0.25, self._startup_write, args=(generation, b"\r"))
+            timer.daemon = True
+            timer.start()
+
+    def _startup_write(self, generation, data):
+        with self.lock:
+            if self.generation != generation or self.fd is None:
+                return False
+            try:
+                os.write(self.fd, data)
+                return True
+            except OSError:
+                return False  # The process may have exited before its reader notices.
 
     def _read(self):
         while True:
@@ -225,15 +250,32 @@ def main():
     parser.add_argument("--port", type=int, default=7681)
     parser.add_argument("--cwd", default=os.getcwd())
     parser.add_argument("--session", action="append", metavar="NAME=COMMAND", help="a named session and its command, e.g. claude=claude; repeatable (default: shell=$SHELL)")
+    parser.add_argument("--startup-input", action="append", default=[], metavar="NAME=TEXT", help="text to send followed by Enter once per new process")
+    parser.add_argument("--startup-delay", action="append", default=[], metavar="NAME=MILLISECONDS", help="delay before startup input (default: 0)")
     parser.add_argument("--print-token", action="store_true", help="print the token, creating it if needed, and exit")
     args = parser.parse_args()
+    inputs, delays = {}, {}
+    for spec in args.startup_input:
+        name, separator, text = spec.partition("=")
+        if not separator:
+            parser.error("--startup-input requires NAME=TEXT")
+        inputs[name] = text
+    for spec in args.startup_delay:
+        name, separator, value = spec.partition("=")
+        try:
+            delay = float(value)
+            if not separator or not 0 <= delay < float("inf"):
+                raise ValueError()
+            delays[name] = delay
+        except ValueError:
+            parser.error("--startup-delay requires NAME=finite nonnegative milliseconds")
     cwd = os.path.abspath(os.path.expanduser(args.cwd))
     BridgeHandler.token = load_token(cwd)
     if args.print_token:
         return print(BridgeHandler.token)
     for spec in args.session or ["shell=" + os.environ.get("SHELL", "bash")]:
         name, _, command = spec.partition("=")
-        Handler.sessions[name] = Session(command, cwd)
+        Handler.sessions[name] = Session(command, cwd, inputs.get(name), delays.get(name, 0))
     ThreadingHTTPServer(("127.0.0.1", args.port), Handler).serve_forever()
 
 
