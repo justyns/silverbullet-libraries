@@ -23,6 +23,7 @@ To add this repository to your SilverBullet instance, use the `Library: Add Repo
 - [Get GPS Coords](https://github.com/justyns/silverbullet-libraries/blob/master/Get%20GPS%20Coords.md): Lua function to get the current GPS coordinates of the client browser.
 - [Markdown Utilities](https://github.com/justyns/silverbullet-libraries/blob/master/Markdown%20Utilities.md): Space Lua helpers for finding headings and list items and inserting text under a heading, built on markdown.parseMarkdown.
 - [Open Scratch](https://github.com/justyns/silverbullet-libraries/blob/master/Open%20Scratch.md): Commands to open a scratch page, or show it in the right panel next to the current page.
+- [Share to GitHub Repo](https://github.com/justyns/silverbullet-libraries/blob/master/Share%20to%20GitHub%20Repo.md): Commands that push the current page to preconfigured GitHub repos and set its share frontmatter, so `Share: Page` handles later updates.
 
 ### silverbullet-ai tools
 
