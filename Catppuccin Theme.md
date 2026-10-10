@@ -13,6 +13,8 @@ config.set("catppuccin", {light = "latte", dark = "macchiato"})
 
 Colors are from the [Catppuccin palette](https://catppuccin.com/palette) (MIT) and are assigned following the [Catppuccin style guide](https://github.com/catppuccin/catppuccin/blob/main/docs/style-guide.md).
 
+## Implementation
+
 ```space-lua
 -- priority: -100
 -- Negative priority runs this after CONFIG, so config.get returns the user's flavors.
