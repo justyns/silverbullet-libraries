@@ -67,4 +67,10 @@ description: Connects Claude Code and Codex to SilverBullet as their IDE, sharin
 website: https://github.com/justyns/silverbullet-libraries
 author: justyns
 uri: https://github.com/justyns/silverbullet-libraries/blob/master/Agent IDE/Agent IDE.md
+---
+name: Share to GitHub Repo
+description: Commands that push the current page to preconfigured GitHub repos and set its share frontmatter, so Share: Page handles later updates.
+website: https://github.com/justyns/silverbullet-libraries
+author: justyns
+uri: https://github.com/justyns/silverbullet-libraries/blob/master/Share to GitHub Repo.md
 ```
