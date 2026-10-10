@@ -17,6 +17,7 @@ Adds a terminal in a [View](https://docs.silverbullet.md/View) that you can togg
 
 Set `terminal.sessions` to configure what you want to launch.  e.g. just "bash" or "zsh" if you want a regular terminal.  If available, screen or tmux would  be a good idea too.
 
+
 Each session gets a tab in one terminal view, and its command opens that tab.
 
 ```lua
@@ -130,7 +131,7 @@ config.define("terminal", {
     bridge = {type = "string", default = "localhost:7681", description = "Host and port of the terminal bridge, as seen from the SilverBullet server"},
     sessions = {
       type = "array",
-      description = "Bridge sessions to add commands for",
+      description = "Bridge sessions, each shown as a tab in the terminal view with a command that opens it",
       items = {
         type = "object",
         properties = {
@@ -383,10 +384,12 @@ end
 js.window.eval([[
   (() => {
     const tabs = window.sbTerminalTabs ??= {};
+    tabs.active ??= localStorage.getItem("sbTerminalActiveTab");
     tabs.isOpen = () => !!tabs.root?.isConnected;
     tabs.close = () => tabs.root.closest(".sb-nav-root").querySelector(".sb-nav-close").click();
     tabs.select = (name) => {
       tabs.active = name;
+      localStorage.setItem("sbTerminalActiveTab", name);
       for (const el of tabs.root.querySelectorAll("[data-session]")) {
         el.classList.toggle("active", el.dataset.session === name);
       }
@@ -403,6 +406,8 @@ js.window.eval([[
       const names = [...root.firstChild.children].map((tab) => tab.dataset.session);
       tabs.select(names.includes(tabs.active) ? tabs.active : names[0]);
     };
+    clearTimeout(tabs.restoreTimer);
+    tabs.restoreTimer = setTimeout(() => client.runCommandByName("Terminal: Restore Dock"), 100);
   })();
 ]])
 
@@ -436,6 +441,22 @@ view.define {
     js.window.sbTerminalTabs.mount(root)
     return root
   end,
+}
+
+-- At boot, SilverBullet can restore a docked terminal while a script reload has the view unregistered,
+-- which leaves the dock showing "No navigator view named terminal". The timer above runs this after the last script load.
+command.define {
+  name = "Terminal: Restore Dock",
+  hide = true,
+  run = function()
+    if js.window.sbTerminalTabs.isOpen() then return end
+    for _, slot in ipairs({"lhs", "rhs", "bhs"}) do
+      if datastore.get({"navigator", "docked", slot}) == "terminal" then
+        view.open("terminal")
+        return
+      end
+    end
+  end
 }
 
 for _, session in ipairs(sessions) do
