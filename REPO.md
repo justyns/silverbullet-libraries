@@ -73,4 +73,22 @@ description: Commands that push the current page to preconfigured GitHub repos a
 website: https://github.com/justyns/silverbullet-libraries
 author: justyns
 uri: https://github.com/justyns/silverbullet-libraries/blob/master/Share to GitHub Repo.md
+---
+name: Date functions
+description: getCurrentDateTime() and getToday() Lua functions, plus /now and /currentDateTime slash commands that insert the current date and time.
+website: https://github.com/justyns/silverbullet-libraries
+author: justyns
+uri: https://github.com/justyns/silverbullet-libraries/blob/master/Date functions.md
+---
+name: Move Page to Dated Folder
+description: Command that moves the current page into <folder>/YYYY/ or <folder>/YYYY/MM-Month/ based on its date, for folders set in config.
+website: https://github.com/justyns/silverbullet-libraries
+author: justyns
+uri: https://github.com/justyns/silverbullet-libraries/blob/master/Move Page to Dated Folder.md
+---
+name: Recurring Tasks
+description: Stamps a done date on completed tasks and adds the next occurrence of tasks with a 🔁 rule, using the Obsidian Tasks emoji format.
+website: https://github.com/justyns/silverbullet-libraries
+author: justyns
+uri: https://github.com/justyns/silverbullet-libraries/blob/master/Recurring Tasks.md
 ```
