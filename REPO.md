@@ -44,6 +44,12 @@ website: https://github.com/justyns/silverbullet-libraries
 author: justyns
 uri: https://github.com/justyns/silverbullet-libraries/blob/master/Markdown Utilities.md
 ---
+name: Journal Quick Add
+description: "Journal: Add Note command that appends a timestamped bullet to today's journal entry from a modal editor with page and tag completion. Requires Markdown Utilities."
+website: https://github.com/justyns/silverbullet-libraries
+author: justyns
+uri: https://github.com/justyns/silverbullet-libraries/blob/master/Journal Quick Add/Journal Quick Add.md
+---
 name: Catppuccin Theme
 description: Catppuccin theme with all four flavors, picked separately for light and dark mode in the Configuration Manager.
 website: https://github.com/justyns/silverbullet-libraries
@@ -69,7 +75,7 @@ author: justyns
 uri: https://github.com/justyns/silverbullet-libraries/blob/master/Agent IDE/Agent IDE.md
 ---
 name: Share to GitHub Repo
-description: Commands that push the current page to preconfigured GitHub repos and set its share frontmatter, so Share: Page handles later updates.
+description: "Commands that push the current page to preconfigured GitHub repos and set its share frontmatter, so Share: Page handles later updates."
 website: https://github.com/justyns/silverbullet-libraries
 author: justyns
 uri: https://github.com/justyns/silverbullet-libraries/blob/master/Share to GitHub Repo.md
